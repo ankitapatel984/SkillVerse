@@ -4,13 +4,14 @@ import { Footer } from "@/components/Footer";
 import { SkillSearch } from "@/components/SkillSearch";
 import { ProfileCard } from "@/components/ProfileCard";
 import { User, apiService } from '@/services/api'; // Ensure this exists and has getPublicProfiles()
+import { useAuth } from "@/contexts/AuthContext";
 
 const Browse = () => {
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [profiles, setProfiles] = useState<any[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleSkillSelect = (skill: string) => {
     setSelectedSkills(prev =>
@@ -20,23 +21,38 @@ const Browse = () => {
     );
     setPage(1); // Reset to page 1 when filters change
   };
+  const { user ,isLoading} = useAuth(); // Get current user
 
-  const fetchProfiles = async (skills: string[], page: number) => {
-    setIsLoading(true);
-    try {
-      const response = await apiService.getPublicProfiles({ skills, page });
-      setProfiles(response.users || []);
-      setTotalPages(response.pages || 1);
-    } catch (error) {
-      console.error("Failed to fetch profiles:", error);
-    } finally {
-      setIsLoading(false);
+ const fetchProfiles = async (skills: string[], page: number) => {
+  setLoading(true);
+  try {
+    const response = await apiService.getPublicProfiles({ skills, page });
+
+    let visibleProfiles = response.users || [];
+
+    // Only filter if user is logged in
+    if (user) {
+      visibleProfiles = visibleProfiles.filter(
+        (profile: any) => profile._id !== user._id
+      );
     }
-  };
 
-  useEffect(() => {
-    fetchProfiles(selectedSkills, page);
-  }, [selectedSkills, page]);
+    setProfiles(visibleProfiles);
+    setTotalPages(response.pages || 1);
+  } catch (error) {
+    console.error("Failed to fetch profiles:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+ useEffect(() => {
+  // Wait until user is loaded before making the first API call
+    if (isLoading) return;
+  fetchProfiles(selectedSkills, page);
+  
+}, [selectedSkills, page, user]);
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -79,14 +95,14 @@ const Browse = () => {
             </div>
 
             {/* Profile Grid */}
-            {isLoading ? (
+            {loading ? (
               <div className="text-center py-8 text-muted-foreground">Loading profiles...</div>
             ) : (
               <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-6">
                 {profiles.map((profile, index) => (
                   <ProfileCard
                     key={index}
-                    id={profile.id}
+                    id={profile._id}
                     name={profile.name}
                     location={profile.location}
                     avatar={profile.avatar}

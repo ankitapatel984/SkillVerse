@@ -6,6 +6,7 @@ interface Skill {
 }
 
 export interface User {
+  _id: any;
   id: string;
   email: string;
   name: string;
@@ -255,18 +256,27 @@ class ApiService {
   }
 
   // Get my swaps: GET /api/swaps/me
-  async getMySwaps(): Promise<any[]> {
-    try {
-      const response = await fetch(`${API_BASE_URL}/swaps/me`, {
-        headers: this.getHeaders(),
-        credentials: 'include'
-      });
-      if (!response.ok) return [];
-      return await response.json();
-    } catch {
-      return [];
+  async getMySwaps(): Promise<{ sentSwaps: any[]; receivedSwaps: any[] }> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/swaps/me`, {
+      headers: this.getHeaders(),
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      return { sentSwaps: [], receivedSwaps: [] };
     }
+
+    const data = await response.json();
+    return {
+      sentSwaps: data.sentSwaps || [],
+      receivedSwaps: data.receivedSwaps || []
+    };
+  } catch {
+    return { sentSwaps: [], receivedSwaps: [] };
   }
+}
+
 
   // Update swap: PUT /api/swaps/:id with { status }
   async updateSwapStatus(swapId: string, status: 'pending' | 'accepted' | 'rejected'): Promise<{ success: boolean; message: string }> {
