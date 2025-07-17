@@ -87,7 +87,7 @@ exports.updateMe = async (req, res, next) => {
     ];
 
     const updates = {};
-
+     //console.log(req.body);
     // Allowed skill levels
     const validLevels = ['Beginner', 'Intermediate', 'Advanced'];
 
@@ -109,7 +109,7 @@ exports.updateMe = async (req, res, next) => {
         }
       }
     });
-
+    console.log(req.body);
     // Hash password if it's being updated
     if (updates.password) {
       const bcrypt = require('bcrypt');

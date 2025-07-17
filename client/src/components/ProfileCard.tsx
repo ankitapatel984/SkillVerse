@@ -6,6 +6,7 @@ import { MapPin, Clock, Star, MessageSquare, Calendar } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthModal } from "@/components/auth/AuthModal";
+import { RequestSwapForm } from "@/components/RequestSwapForm";
 import { apiService } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
 
@@ -34,44 +35,23 @@ export const ProfileCard = ({
   location, 
   avatar, 
   rating, 
-  skillsOffered=[], 
-  skillsWanted=[], 
-  availability=[], 
+  skillsOffered, 
+  skillsWanted, 
+  availability, 
   bio,
-  completedSwaps=0,
+  completedSwaps,
   isOwnProfile = false 
 }: ProfileCardProps) => {
   const { isAuthenticated } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showSwapForm, setShowSwapForm] = useState(false);
   const { toast } = useToast();
-   console.log(skillsOffered, skillsWanted, availability);
 
-  const handleRequestSwap = async () => {
+  const handleRequestSwap = () => {
     if (!isAuthenticated) {
       setShowAuthModal(true);
     } else {
-      // TODO: Connect to your backend API
-      // Note: API requires specific skills - this is a placeholder
-      console.log(id);
-      const result = await apiService.requestSwap({
-        toUser: id,
-        offeredSkill: skillsOffered[0]?.name || "General",
-        wantedSkill: skillsWanted[0]?.name || "General",
-        message: `Hi ${name}, I'd like to propose a skill swap!`
-      });
-      console.log(result);
-      if (result.success) {
-        toast({
-          title: "Swap Request Sent",
-          description: `Your swap request has been sent to ${name}.`,
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: result.message,
-          variant: "destructive",
-        });
-      }
+      setShowSwapForm(true);
     }
   };
 
@@ -210,6 +190,15 @@ export const ProfileCard = ({
       isOpen={showAuthModal}
       onClose={() => setShowAuthModal(false)}
       defaultTab="signin"
+    />
+    
+    <RequestSwapForm
+      isOpen={showSwapForm}
+      onClose={() => setShowSwapForm(false)}
+      toUserId={id}
+      toUserName={name}
+      toUserSkillsWanted={skillsWanted}
+      toUserSkillsOffered={skillsOffered}
     />
     </>
   );

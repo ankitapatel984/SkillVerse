@@ -7,11 +7,11 @@ import { Clock, CheckCircle, XCircle, MessageSquare, Calendar, ArrowRightLeft } 
 type SwapStatus = 'pending' | 'accepted' | 'rejected' | 'completed' | 'cancelled';
 
 interface SwapRequestCardProps {
-  id: string;
+  _id: string;
   requesterName: string;
   requesterAvatar?: string;
-  skillOffered: string;
-  skillWanted: string;
+  offeredSkill: string;
+  wantedSkill: string;
   message?: string;
   status: SwapStatus;
   createdAt: string;
@@ -51,11 +51,11 @@ const statusConfig = {
 };
 
 export const SwapRequestCard = ({
-  id,
+  _id,
   requesterName,
   requesterAvatar,
-  skillOffered,
-  skillWanted,
+  offeredSkill,
+  wantedSkill,
   message,
   status,
   createdAt,
@@ -67,7 +67,6 @@ export const SwapRequestCard = ({
 }: SwapRequestCardProps) => {
   const config = statusConfig[status];
   const StatusIcon = config.icon;
-
   return (
     <Card className="shadow-soft hover:shadow-medium transition-smooth">
       <CardHeader className="pb-4">
@@ -76,7 +75,7 @@ export const SwapRequestCard = ({
             <Avatar className="w-12 h-12">
               <AvatarImage src={requesterAvatar} alt={requesterName} />
               <AvatarFallback className="bg-primary text-primary-foreground">
-                {requesterName.split(' ').map(n => n[0]).join('')}
+                {requesterName?.split(' ').map(n => n[0]).join('')}
               </AvatarFallback>
             </Avatar>
             <div>
@@ -102,7 +101,7 @@ export const SwapRequestCard = ({
               <div className="text-center">
                 <div className="font-medium text-primary">{type === 'sent' ? 'You offer' : 'They offer'}</div>
                 <Badge variant="outline" className="skill-tag-offered mt-1">
-                  {skillOffered}
+                  {offeredSkill}
                 </Badge>
               </div>
               
@@ -111,7 +110,7 @@ export const SwapRequestCard = ({
               <div className="text-center">
                 <div className="font-medium text-secondary">{type === 'sent' ? 'You want' : 'They want'}</div>
                 <Badge variant="outline" className="skill-tag-wanted mt-1">
-                  {skillWanted}
+                  {wantedSkill}
                 </Badge>
               </div>
             </div>

@@ -38,7 +38,7 @@ const Profile = () => {
     skillsWanted: user?.skillsWanted || [] as Skill[],
     availability: user?.availability || [] as string[]
   });
-
+  
   useEffect(() => {
     if (user) {
       setProfileData({
@@ -53,12 +53,14 @@ const Profile = () => {
       });
     }
   }, [user]);
+ 
 
   const [newSkill, setNewSkill] = useState({
     name: "",
     level: "Beginner" as SkillLevel,
     type: "offered" as "offered" | "wanted"
   });
+  const [newAvailability, setNewAvailability]=useState("");
 
   const handleSave = async () => {
     setIsUpdating(true);
@@ -72,7 +74,7 @@ const Profile = () => {
       availability: profileData.availability,
       profileVisibility: (profileData.isPublic ? 'public' : 'private') as "public" | "private"
     };
-
+    console.log("Update Data: ",profileData.availability);
     const result = await updateUser(updateData);
 
     if (result.success) {
@@ -108,6 +110,23 @@ const Profile = () => {
       });
     }
   };
+
+  const addAvailability = () => {
+    if (!newAvailability.trim()) return;
+    const availability = newAvailability.trim();
+    setProfileData(prev => ({
+      ...prev,
+      availability: [...prev.availability, availability]
+    }));
+    setNewAvailability(""); 
+  };
+
+  const removeAvailability = (availability: string) => {
+    setProfileData(prev => ({
+      ...prev,
+      availability: prev.availability.filter(a => a !== availability)
+    }));
+  }
 
   const addSkill = () => {
     if (!newSkill.name.trim()) return;
@@ -223,13 +242,6 @@ const Profile = () => {
                         <Input id="name" value={profileData.name} onChange={(e) => setProfileData(prev => ({ ...prev, name: e.target.value }))} />
                         <Input id="location" placeholder="City, State" value={profileData.location} onChange={(e) => setProfileData(prev => ({ ...prev, location: e.target.value }))} />
                         <Textarea id="bio" placeholder="Tell others about yourself..." value={profileData.bio} onChange={(e) => setProfileData(prev => ({ ...prev, bio: e.target.value }))} rows={3} />
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <Label htmlFor="public">Public Profile</Label>
-                            <p className="text-sm text-muted-foreground">Allow others to find and contact you</p>
-                          </div>
-                          <Switch id="public" checked={profileData.isPublic} onCheckedChange={(checked) => setProfileData(prev => ({ ...prev, isPublic: checked }))} />
-                        </div>
                       </CardContent>
                     </Card>
 
@@ -256,10 +268,15 @@ const Profile = () => {
                         </div>
                         <Button onClick={addSkill} size="sm" className="w-full"><Plus className="h-4 w-4 mr-2" />Add Skill</Button>
                       </CardContent>
+                      <CardHeader><CardTitle>Add New Availability</CardTitle></CardHeader>
+                      <CardContent className="space-y-4">
+                         <Input id="availability" placeholder="e.g., Weekdays, Weekends" value={newAvailability} onChange={(e) => setNewAvailability(( e.target.value ))} />
+                        <Button onClick={addAvailability} size="sm" className="w-full"><Plus className="h-4 w-4 mr-2" />Add Availability</Button>
+                      </CardContent>
                     </Card>
 
                     <Card className="shadow-soft">
-                      <CardHeader><CardTitle>Manage Skills</CardTitle></CardHeader>
+                      <CardHeader><CardTitle>Manage Skills & Availability</CardTitle></CardHeader>
                       <CardContent className="space-y-4">
                         <Label className="text-sm font-medium text-muted-foreground">Skills You Offer</Label>
                         <div className="flex flex-wrap gap-2 mt-2">
@@ -275,6 +292,16 @@ const Profile = () => {
                           {profileData.skillsWanted.map(skill => (
                             <Badge key={skill.name} variant="outline" className="cursor-pointer hover:bg-destructive/90 hover:text-destructive-foreground" onClick={() => removeSkill(skill.name, "wanted")}>
                               {skill.name}<X className="h-3 w-3 ml-1" />
+                            </Badge>
+                          ))}
+                        </div>
+                      </CardContent>
+                      <CardContent>
+                        <Label className="text-sm font-medium text-muted-foreground">Availability</Label>
+                         <div className="flex flex-wrap gap-2 mt-2">
+                          {profileData.availability.map(avail => (
+                            <Badge key={avail} variant="outline" className="cursor-pointer hover:bg-destructive/90" onClick={() => removeAvailability(avail)}>
+                              {avail}<X className="h-3 w-3 ml-1" />
                             </Badge>
                           ))}
                         </div>

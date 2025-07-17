@@ -13,7 +13,7 @@ router.get('/',
     query('search').optional().isString(),
   ],
   validateMiddleware,
-  authMiddleware,
+  // authMiddleware,
   userController.getUsers
 );
 
@@ -28,7 +28,7 @@ router.put('/me',
     body('profilePhoto').optional().isString(),
     body('skillsOffered').optional().isArray(),
     body('skillsWanted').optional().isArray(),
-    body('availability').optional().isString(),
+    body('availability').optional().isArray(),
   ],
   validateMiddleware,
   userController.updateMe
